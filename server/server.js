@@ -24,6 +24,7 @@ mongoose.connect(config.DATABASE, {useNewUrlParser:true});
 
 ////########## MODELS ##########\\\\
 const {User} = require('./models/user');
+const {Article} = require('./models/article');
 
 
 ////########## MIDDLEWARE ##########\\\\
@@ -39,7 +40,13 @@ app.use(cookieParser());
 ////GET////
 //#region get
 app.get('/',(req,res)=>{
-    res.render('home');
+    Article.find().sort({_id:'asc'}).limit(10).exec((err,doc)=>{
+        if(err) return res.status(400).send(err);
+        res.render('home',{
+            articles:doc
+        });
+    });
+    
 });
 
 app.get('/register',auth,(req,res)=>{
@@ -94,8 +101,19 @@ app.post('/api/user/login',(req,res)=>{
     });
 });
 
-app.post('/api/admin/post_article',(req,res)=>{
-    
+app.post('/api/admin/post_article',auth,(req,res)=>{
+    const article = new Article({
+        ownerUsername:req.user.username,
+        ownerId:req.user._id,
+        title:req.body.title,
+        review:req.body.review,
+        rating:req.body.rating
+    });
+
+    article.save((err,doc)=>{
+        if(err) return res.status(400).send(err);
+        res.status(200).send();
+    })
 });
 //#endregion
 
