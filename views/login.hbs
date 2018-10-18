@@ -1,0 +1,61 @@
+<div class="container_login">
+    <form id="login_form">
+        <h1>Log in</h1>
+        <div>
+            <input type="text" id="username" name="username" placeholder="Enter your username">
+        </div>
+
+        <div>
+            <input type="password" id="password" name="password" placeholder="Enter your password">
+        </div>
+
+        <button type="submit">Log in</button>
+        <span>or
+            <a href="/register">Register</a>
+        </span>
+    </form>
+</div>
+
+<script>
+    $("#login_form").validate({
+        rules: {
+            username:{
+                required: true,
+                maxlength: 16
+            },
+            password: {
+                required: true,
+                minlength: 8,
+                maxlength: 50
+            },
+        },
+        messages: {
+            username:"Please enter your username.",
+            password:"The password is required"
+        },
+        submitHandler: function(form,event) {
+            event.preventDefault();
+            submitForm();
+        }
+    });
+
+    function submitForm() {
+        const userLogin = {
+            username: $('#username').val(),
+            password: $('#password').val()
+        }
+
+        $.ajax({
+            type:'POST',
+            url:'/api/user/login',
+            data:JSON.stringify(userLogin),
+            contentType:"application/json",
+            success:(data)=>{
+                window.location.href = "/"
+            },
+            error:()=>{
+                alert(`Fuck you. I don't want you in my website.`);
+            }
+        });
+    }
+</script>
