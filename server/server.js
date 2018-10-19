@@ -25,6 +25,7 @@ mongoose.connect(config.DATABASE, {useNewUrlParser:true});
 ////########## MODELS ##########\\\\
 const {User} = require('./models/user');
 const {Article} = require('./models/article');
+const {UserReview} = require('./models/user_review');
 
 
 ////########## MIDDLEWARE ##########\\\\
@@ -46,7 +47,6 @@ app.get('/',(req,res)=>{
             articles:doc
         });
     });
-    
 });
 
 app.get('/register',auth,(req,res)=>{
@@ -57,6 +57,22 @@ app.get('/register',auth,(req,res)=>{
 app.get('/login',auth,(req,res)=>{
     if(req.user) return res.redirect('/dashboard');
     res.render('login');
+});
+
+app.get('/article/:id',auth,(req,res)=>{
+    let addReview = req.user ? true : false;
+    Article.findById(req.params.id,(err,article)=>{
+        if(err) return res.status(400).send(err);
+
+        UserReview.find({'postId':req.params.id}).exec((err,userReviews)=>{
+            res.render('article',{
+                date:moment(article.createdAt).format('MM/DD/YY'),
+                article,
+                review:addReview,
+                userReviews
+            });
+        });
+    });
 });
 
 app.get('/dashboard',auth,(req,res)=>{
@@ -111,6 +127,22 @@ app.post('/api/admin/post_article',auth,(req,res)=>{
     });
 
     article.save((err,doc)=>{
+        if(err) return res.status(400).send(err);
+        res.status(200).send();
+    });
+});
+
+app.post('/api/review/add',auth,(req,res)=>{
+    const userReview = new UserReview({
+        postId:req.body.id,
+        ownerUsername:req.user.username,
+        ownerId:req.user._id,
+        titlePost:req.body.titlePost,
+        review:req.body.review,
+        rating:req.body.rating
+    });
+
+    userReview.save((err,doc)=>{
         if(err) return res.status(400).send(err);
         res.status(200).send();
     })
