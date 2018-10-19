@@ -40,10 +40,11 @@ app.use(cookieParser());
 ////########## ROUTES ##########\\\\
 ////GET////
 //#region get
-app.get('/',(req,res)=>{
+app.get('/',auth,(req,res)=>{
     Article.find().sort({_id:'asc'}).limit(10).exec((err,doc)=>{
         if(err) return res.status(400).send(err);
         res.render('home',{
+            loggedIn:req.user ? true :false,
             articles:doc
         });
     });
@@ -87,6 +88,24 @@ app.get('/dashboard/articles',auth,(req,res)=>{
     if(!req.user) return res.redirect('/login');
     res.render('admin_articles',{
         isAdmin: req.user.role === 1 ? true : false
+    });
+});
+
+app.get('/dashboard/reviews',auth,(req,res)=>{
+    if(!req.user) return res.redirect('/login');
+    UserReview.find({'ownerId':req.user._id}).exec((err,userReviews)=>{
+        res.render('admin_reviews',{
+            dashboard:true,
+            isAdmin:req.user.role === 1 ? true : false,
+            userReviews
+        });
+    });
+});
+
+app.get('/dashboard/logout',auth,(req,res)=>{
+    req.user.deleteToken(req.token,(err,user)=>{
+        if(err) return res.status(400).send(err);
+        res.redirect('/');
     });
 });
 //#endregion

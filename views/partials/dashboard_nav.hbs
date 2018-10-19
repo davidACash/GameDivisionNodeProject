@@ -5,6 +5,7 @@
             <i class="fa fa-home" aria-hidden="true"></i>
         </a>
     </div>
+    {{#if loggedIn}}
     <!--  REVIEWS --> 
     <div class="item">
         <a href="/dashboard/reviews">
@@ -28,4 +29,13 @@
             <i class="fa fa-sign-out-alt" aria-hidden="true"></i>
         </a>
     </div>
+    {{else}}
+
+    <!-- LOGIN -->
+    <div class="item">
+        <a href="/login">
+            <i class="fa fa-sign-in-alt" aria-hidden="true"></i>
+        </a>
+    </div>
+    {{/if}}
 </div>
